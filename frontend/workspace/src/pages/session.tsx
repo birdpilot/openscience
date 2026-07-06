@@ -435,16 +435,9 @@ export default function Page(): JSX.Element {
                               container: "w-full px-4 md:px-8",
                             }}
                           />
+                          {/* Space, not a rule — the bubbles already separate turns. */}
                           <Show when={index() < turnMessages().length - 1}>
-                            <div class="w-full px-4 md:px-8 pt-2 pb-1">
-                              <div
-                                style={{
-                                  height: "1px",
-                                  background: "var(--color-border)",
-                                  opacity: 0.6,
-                                }}
-                              />
-                            </div>
+                            <div style={{ height: "22px" }} />
                           </Show>
                         </div>
                       )}
