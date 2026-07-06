@@ -36,6 +36,18 @@ bun dev serve           # headless API server (port 4096 by default)
 bun dev web             # start the server and open the workspace
 ```
 
+### Checks
+
+Before pushing, run the same gates CI enforces — typecheck, tests, and formatting:
+
+```bash
+bun run typecheck
+bun test --cwd backend/cli
+bunx prettier --check .
+```
+
+See [docs/notes/verification.md](docs/notes/verification.md) for the full list, including the workspace build.
+
 ### Building a standalone binary
 
 ```bash
