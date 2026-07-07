@@ -121,6 +121,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
   const globalSync = useGlobalSync()
   const platform = usePlatform()
   const local = useLocal()
+  // Fast (priority) speed toggle — gpt-5.5 only, where it maps to OpenAI
+  // service_tier: priority (plumbed in src/session/llm.ts). Reset per model.
+  const supportsFast = createMemo(() => {
+    const id = local.model.current()?.id
+    return !!id && /gpt-5\.5/.test(id.toLowerCase())
+  })
+  const [fast, setFast] = createSignal(false)
+  createEffect(on(() => local.model.current()?.id, () => setFast(false), { defer: true }))
   const files = useFile()
   const prompt = usePrompt()
   const commentCount = createMemo(() => prompt.context.items().filter((item) => !!item.comment?.trim()).length)
@@ -1603,6 +1611,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
         messageID,
         parts: requestParts,
         variant,
+        fast: supportsFast() ? fast() : undefined,
       })
     }
 
@@ -2005,6 +2014,20 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                       {local.model.variant.current() ?? language.t("common.default")}
                     </Button>
                   </TooltipKeybind>
+                </Show>
+                {/* Speed toggle — gpt-5.5 priority processing (normal / fast) */}
+                <Show when={supportsFast()}>
+                  <Tooltip placement="top" value="Response speed — fast uses priority processing (gpt-5.5)">
+                    <Button
+                      data-action="model-fast-toggle"
+                      variant="ghost"
+                      class="text-text-base group-hover/prompt-input:inline-block capitalize"
+                      onClick={() => setFast((v) => !v)}
+                      aria-pressed={fast()}
+                    >
+                      {fast() ? "fast" : "normal"}
+                    </Button>
+                  </Tooltip>
                 </Show>
                 <Show when={permission.permissionsEnabled() && params.id}>
                   <TooltipKeybind
