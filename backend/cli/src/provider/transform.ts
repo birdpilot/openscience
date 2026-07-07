@@ -600,8 +600,13 @@ export namespace ProviderTransform {
           },
           max: {
             thinking: {
+              // Keep the thinking budget proportional (~3/4 of the output cap)
+              // instead of `cap - 1`: on a 32k-output model, a 31,999-token
+              // budget made maxOutputTokens() return just 1 text token, so the
+              // visible answer was truncated to a single token. Large-cap models
+              // are unaffected (still clamp at 31,999).
               type: "enabled",
-              budgetTokens: Math.min(31_999, cap - 1),
+              budgetTokens: Math.min(31_999, Math.floor((cap * 3) / 4)),
             },
           },
         }
@@ -672,13 +677,19 @@ export namespace ProviderTransform {
             },
           }
         }
-        // Gemini 3+ uses thinkingLevel
+        // Gemini 3+ uses thinkingLevel. Nest under `thinkingConfig` — the
+        // @ai-sdk/google provider only reads providerOptions.google.thinkingConfig.*,
+        // so the previous top-level keys were dropped and the selected effort was
+        // silently ignored (every call defaulted to the high thinkingLevel from
+        // options()). options()/smallOptions() already nest correctly.
         return Object.fromEntries(
           WIDELY_SUPPORTED_EFFORTS.map((effort) => [
             effort,
             {
-              includeThoughts: true,
-              thinkingLevel: effort,
+              thinkingConfig: {
+                includeThoughts: true,
+                thinkingLevel: effort,
+              },
             },
           ]),
         )
@@ -733,8 +744,15 @@ export namespace ProviderTransform {
       result["usage"] = {
         include: true,
       }
-      if (input.model.api.id.includes("gemini-3")) {
-        result["reasoning"] = { effort: "high" }
+      // OpenRouter streams reasoning through its unified `reasoning` /
+      // `reasoning_details` fields, but ONLY when reasoning is explicitly
+      // requested — without a `reasoning` object the upstream reasons silently
+      // and OR drops the trace, so every reasoning part lands empty. Request it
+      // by default for every reasoning-capable model (a selected effort variant
+      // overrides this via mergeDeep in llm.ts). This is the single normalized
+      // reasoning path that all managed wallet inference now flows through.
+      if (input.model.capabilities.reasoning) {
+        result["reasoning"] = { effort: input.model.api.id.includes("gemini-3") ? "high" : "medium" }
       }
     }
 
@@ -765,7 +783,16 @@ export namespace ProviderTransform {
       }
     }
 
-    if (input.model.api.id.includes("gpt-5") && !input.model.api.id.includes("gpt-5-chat")) {
+    // OpenRouter-routed gpt-5 (e.g. "openai/gpt-5") is handled by the unified
+    // OpenRouter reasoning branch above. The OpenAI-Responses-only keys below
+    // (reasoningEffort / reasoningSummary / include: reasoning.encrypted_content)
+    // are meaningless to OR's /chat/completions and were silently making managed
+    // gpt-5 reasoning stream blank — exclude the OR npm here.
+    if (
+      input.model.api.id.includes("gpt-5") &&
+      !input.model.api.id.includes("gpt-5-chat") &&
+      input.model.api.npm !== "@openrouter/ai-sdk-provider"
+    ) {
       if (!input.model.api.id.includes("gpt-5-pro")) {
         result["reasoningEffort"] = "medium"
       }
@@ -802,6 +829,13 @@ export namespace ProviderTransform {
   }
 
   export function smallOptions(model: Provider.Model) {
+    // OpenRouter first: an OR-routed gpt-5 / gemini model must use OR's unified
+    // `reasoning` shape, not the OpenAI/Google keys the branches below emit. OR
+    // silently ignores `reasoningEffort`, so without this a small OR call (title
+    // / summary / compaction) would still reason and bill. Small = skip it.
+    if (model.api.npm === "@openrouter/ai-sdk-provider" || model.providerID === "openrouter") {
+      return { reasoning: { enabled: false } }
+    }
     if (model.providerID === "openai" || model.api.id.includes("gpt-5")) {
       if (model.api.id.includes("5.")) {
         return { reasoningEffort: "low" }
@@ -814,12 +848,6 @@ export namespace ProviderTransform {
         return { thinkingConfig: { thinkingLevel: "low" } }
       }
       return { thinkingConfig: { thinkingBudget: 0 } }
-    }
-    if (model.providerID === "openrouter") {
-      if (model.api.id.includes("google")) {
-        return { reasoning: { enabled: false } }
-      }
-      return { reasoningEffort: "minimal" }
     }
     return {}
   }
