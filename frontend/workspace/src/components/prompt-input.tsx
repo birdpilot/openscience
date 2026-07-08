@@ -121,14 +121,6 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
   const globalSync = useGlobalSync()
   const platform = usePlatform()
   const local = useLocal()
-  // Fast (priority) speed toggle — gpt-5.5 only, where it maps to OpenAI
-  // service_tier: priority (plumbed in src/session/llm.ts). Reset per model.
-  const supportsFast = createMemo(() => {
-    const id = local.model.current()?.id
-    return !!id && /gpt-5\.5/.test(id.toLowerCase())
-  })
-  const [fast, setFast] = createSignal(false)
-  createEffect(on(() => local.model.current()?.id, () => setFast(false), { defer: true }))
   const files = useFile()
   const prompt = usePrompt()
   const commentCount = createMemo(() => prompt.context.items().filter((item) => !!item.comment?.trim()).length)
@@ -1611,7 +1603,6 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
         messageID,
         parts: requestParts,
         variant,
-        fast: supportsFast() ? fast() : undefined,
       })
     }
 
@@ -1896,7 +1887,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
             onKeyDown={handleKeyDown}
             classList={{
               "select-text": true,
-              "w-full p-3 pr-12 text-14-regular text-text-strong focus:outline-none whitespace-pre-wrap": true,
+              "w-full p-3 pr-12 text-[15px] leading-relaxed text-text-strong focus:outline-none whitespace-pre-wrap": true,
               "[&_[data-type=file]]:text-syntax-property": true,
               "[&_[data-type=agent]]:text-syntax-type": true,
               "font-mono!": store.mode === "shell",
@@ -1915,7 +1906,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
           </Show>
         </div>
         <div class="relative p-3 flex items-center justify-between">
-          <div class="flex items-center justify-start gap-0.5">
+          <div data-slot="prompt-controls" class="flex items-center justify-start gap-2">
             <Switch>
               <Match when={store.mode === "shell"}>
                 <div class="flex items-center gap-2 px-2 h-6">
@@ -1939,6 +1930,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                     })()}
                     current={local.agent.current()?.name ?? ""}
                     onSelect={local.agent.set}
+                    label={(name) => (name === "ml" ? "ML" : name)}
                     class="capitalize"
                     variant="ghost"
                   />
@@ -1956,6 +1948,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                       label={(name) => {
                         if (!name) return "mode"
                         if (name === "research") return "default"
+                        if (name === "ml") return "ML"
                         return name
                       }}
                       class="capitalize"
@@ -2014,20 +2007,6 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                       {local.model.variant.current() ?? language.t("common.default")}
                     </Button>
                   </TooltipKeybind>
-                </Show>
-                {/* Speed toggle — gpt-5.5 priority processing (normal / fast) */}
-                <Show when={supportsFast()}>
-                  <Tooltip placement="top" value="Response speed — fast uses priority processing (gpt-5.5)">
-                    <Button
-                      data-action="model-fast-toggle"
-                      variant="ghost"
-                      class="text-text-base group-hover/prompt-input:inline-block capitalize"
-                      onClick={() => setFast((v) => !v)}
-                      aria-pressed={fast()}
-                    >
-                      {fast() ? "fast" : "normal"}
-                    </Button>
-                  </Tooltip>
                 </Show>
                 <Show when={permission.permissionsEnabled() && params.id}>
                   <TooltipKeybind

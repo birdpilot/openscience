@@ -10,6 +10,8 @@ import { Tag } from "@synsci/ui/tag"
 import { Dialog } from "@synsci/ui/dialog"
 import { List } from "@synsci/ui/list"
 import { Tooltip } from "@synsci/ui/tooltip"
+import { ProviderIcon } from "@synsci/ui/provider-icon"
+import type { IconName } from "@synsci/ui/icons/provider"
 import { DialogManageModels } from "./dialog-manage-models"
 import { ModelTooltip } from "./model-tooltip"
 import { useLanguage } from "@/context/language"
@@ -32,7 +34,7 @@ const ModelList: Component<{
 
   return (
     <List
-      class={`flex-1 min-h-0 [&_[data-slot=list-scroll]]:flex-1 [&_[data-slot=list-scroll]]:min-h-0 ${props.class ?? ""}`}
+      class={`flex-1 min-h-0 [&_[data-slot=list-scroll]]:flex-1 [&_[data-slot=list-scroll]]:min-h-0 [&_[data-slot=list-search-input]]:!text-[13px] [&_[data-slot=list-header]]:!text-[11px] [&_[data-slot=list-header]]:!uppercase [&_[data-slot=list-header]]:!tracking-wider [&_[data-slot=list-item]]:!py-1 [&_[data-slot=list-search]]:!p-1.5 ${props.class ?? ""}`}
       search={{ placeholder: language.t("dialog.model.search.placeholder"), autofocus: true, action: props.action }}
       emptyMessage={language.t("dialog.model.empty")}
       key={(x) => `${x.provider.id}:${x.id}`}
@@ -74,13 +76,16 @@ const ModelList: Component<{
     >
       {(i) => (
         <div class="w-full flex items-center gap-x-2 text-13-regular">
+          <ProviderIcon id={i.provider.id as IconName} class="size-4 shrink-0 opacity-90" />
           <span class="truncate">{i.name}</span>
-          <Show when={i.provider.id === "synsci" && (!i.cost || i.cost?.input === 0)}>
-            <Tag>{language.t("model.tag.free")}</Tag>
-          </Show>
-          <Show when={i.latest}>
-            <Tag>{language.t("model.tag.latest")}</Tag>
-          </Show>
+          <span class="flex items-center gap-x-1.5 ml-auto shrink-0">
+            <Show when={i.provider.id === "synsci" && (!i.cost || i.cost?.input === 0)}>
+              <Tag>{language.t("model.tag.free")}</Tag>
+            </Show>
+            <Show when={i.latest}>
+              <Tag>{language.t("model.tag.latest")}</Tag>
+            </Show>
+          </span>
         </div>
       )}
     </List>
@@ -182,7 +187,7 @@ export function ModelSelectorPopover<T extends ValidComponent = "div">(props: {
       <Kobalte.Portal>
         <Kobalte.Content
           ref={(el) => setStore("content", el)}
-          class="w-72 h-80 flex flex-col p-2 rounded-md border border-border-base bg-surface-raised-stronger-non-alpha shadow-md z-50 outline-none overflow-hidden"
+          class="w-[264px] h-[min(52vh,288px)] flex flex-col p-1.5 rounded-md border border-border-base bg-surface-raised-stronger-non-alpha shadow-md z-50 outline-none overflow-hidden"
           onEscapeKeyDown={(event) => {
             setStore("dismiss", "escape")
             setStore("open", false)
