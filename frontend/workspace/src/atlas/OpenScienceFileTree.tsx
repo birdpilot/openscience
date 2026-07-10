@@ -2,7 +2,7 @@ import { createSignal, createResource, createMemo, onCleanup, type JSX, For, Sho
 import { useSDK } from "@/context/sdk"
 import { useSync } from "@/context/sync"
 import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { IconFolder, IconFile, IconChevronRight, IconChevronDown, IconRefresh, IconSearch } from "@/thesis/shared/Icon"
+import { IconFolder, IconFile, IconChevronRight, IconChevronDown, IconRefresh, IconSearch } from "@/atlas/shared/Icon"
 
 interface FileNode {
   name: string
@@ -163,7 +163,7 @@ export function OpenScienceFileTree(props: { onOpen?: (path: string) => void }):
       </div>
 
       <div
-        class="thesis-scroll"
+        class="atlas-scroll"
         style={{
           flex: 1,
           "overflow-y": "auto",

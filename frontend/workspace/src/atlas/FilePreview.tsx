@@ -17,8 +17,8 @@ import { useSync } from "@/context/sync"
 import { usePlatform } from "@/context/platform"
 import { FONT_MONO, FONT_SANS, FONT_CODE } from "@/styles/tokens"
 import { PdfViewer } from "@/science/renderers/documents/PdfViewer"
-import { toast } from "@/thesis/Toast"
-import { IconFile, IconX, IconCopy, IconDownload, IconBookOpen, IconBraces, IconRefresh } from "@/thesis/shared/Icon"
+import { toast } from "@/atlas/Toast"
+import { IconFile, IconX, IconCopy, IconDownload, IconBookOpen, IconBraces, IconRefresh } from "@/atlas/shared/Icon"
 
 /**
  * Slide-in SIDE PREVIEW pane for opening a file from the Files tree.
@@ -387,7 +387,7 @@ export function FileView(props: {
           }
         >
           <div
-            class="thesis-scroll"
+            class="atlas-scroll"
             style={{
               flex: 1,
               "min-height": 0,
@@ -399,7 +399,7 @@ export function FileView(props: {
               {/* markdown */}
               <Match when={kind() === "markdown" && !showSource()}>
                 <div style={{ padding: "22px 26px", "max-width": "820px", margin: "0 auto" }}>
-                  <Markdown class="thesis-md" text={draft()} />
+                  <Markdown class="atlas-md" text={draft()} />
                 </div>
               </Match>
 
@@ -458,7 +458,7 @@ export function FileView(props: {
                   value={draft()}
                   spellcheck={false}
                   onInput={(ev) => setDraft(ev.currentTarget.value)}
-                  class="thesis-scroll"
+                  class="atlas-scroll"
                   style={{
                     all: "unset",
                     "box-sizing": "border-box",
@@ -478,7 +478,7 @@ export function FileView(props: {
               <Match when={kind() === "code" || (kind() === "markdown" && showSource())}>
                 <div style={{ padding: "14px 16px" }}>
                   <Markdown
-                    class="thesis-md"
+                    class="atlas-md"
                     text={fence(
                       showSource() && kind() !== "code" ? langFor(kind(), e()) : (LANG[e()] ?? "text"),
                       draft(),

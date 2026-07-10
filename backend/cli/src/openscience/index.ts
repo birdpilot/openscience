@@ -130,7 +130,7 @@ const SAFE_SYNCED_KEYS = new Set([
  * — a 401 on any request signals "key revoked or expired, re-auth".
  */
 interface OpenScienceSession {
-  /** Thesis-issued ``thk_<uuid>.<secret>`` Bearer token. */
+  /** Atlas-issued ``thk_<uuid>.<secret>`` Bearer token. */
   api_key: string
   /** Atlas user_id (UUID). Stored for diagnostics; not used for auth. */
   user_id: string

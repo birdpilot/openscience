@@ -31,7 +31,7 @@ export const PanelBody: ParentComponent = (props) => (
 // Muted "SECTION" subheader with a trailing count.
 export const SectionLabel: Component<{ label: string; count?: number }> = (props) => (
   <div class="flex items-center gap-2 px-0.5">
-    <span class="thesis-section-label">{props.label}</span>
+    <span class="atlas-section-label">{props.label}</span>
     <Show when={props.count !== undefined}>
       <span class="text-10-regular text-text-weaker">{props.count}</span>
     </Show>

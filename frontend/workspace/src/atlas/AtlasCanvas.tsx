@@ -5,7 +5,7 @@
  *  - timeline: layered left-to-right rings with labels
  *
  * Labels use collision avoidance so they never pile up. Pan/drag/zoom and
- * the detail drawer are shared across views. Data comes from /api/thesis/*
+ * the detail drawer are shared across views. Data comes from /api/atlas/*
  * (the Atlas bridge), scoped to the signed-in user's account.
  */
 import {
@@ -26,25 +26,15 @@ import {
 import { useDialog } from "@synsci/ui/context/dialog"
 import { useSync } from "@/context/sync"
 import { useSDK } from "@/context/sdk"
-import { uiStore } from "@/thesis/store/ui"
+import { uiStore } from "@/atlas/store/ui"
 import { FONT_MONO, FONT_SANS, FONT_SERIF, sectionTitle } from "@/styles/tokens"
-import {
-  IconRefresh,
-  IconPlus,
-  IconNetwork,
-  IconArrowRight,
-  IconLayoutGrid,
-  IconAtom,
-  IconActivity,
-} from "@/thesis/shared/Icon"
-import { thesisAPI, type ThesisNode } from "@/thesis/api/thesis"
-import { toast } from "@/thesis/Toast"
-import { promptDialog } from "@/thesis/dialogs"
-import { AsciiSpinner } from "@/thesis/shared/AsciiSpinner"
+import { IconRefresh, IconPlus, IconNetwork, IconArrowRight } from "@/atlas/shared/Icon"
+import { atlasAPI, type AtlasNode } from "@/atlas/api/atlas"
+import { toast } from "@/atlas/Toast"
+import { promptDialog } from "@/atlas/dialogs"
+import { AsciiSpinner } from "@/atlas/shared/AsciiSpinner"
 
 const POSITIONS_KEY = "thesis-canvas-positions-v1"
-const VIEW_MODE_KEY = "dashboard.viewMode"
-const GRAPH_STYLE_KEY = "dashboard.graphStyle"
 const ROOT_R = 12
 const BASE_R = 9
 const MAX_R = 14
@@ -53,15 +43,6 @@ const CARD_W = 210
 const CARD_H = 92
 
 type Mode = "orbit" | "cards" | "timeline"
-type ViewMode = "graph" | "timeline"
-type GraphStyle = "cards" | "orbit"
-
-type ModeIcon = (p: { size?: number; strokeWidth?: number }) => JSX.Element
-const MODES: { k: Mode; label: string; Icon: ModeIcon }[] = [
-  { k: "cards", label: "cards", Icon: IconLayoutGrid },
-  { k: "orbit", label: "orbit", Icon: IconAtom },
-  { k: "timeline", label: "timeline", Icon: IconActivity },
-]
 
 interface Pt {
   x: number
@@ -92,7 +73,7 @@ function outcomeColor(outcome: string | null | undefined): string {
   return "var(--color-text-faint)"
 }
 
-function lifecycleColor(node: ThesisNode): string {
+function lifecycleColor(node: AtlasNode): string {
   if (node.outcome === "completed") return "var(--color-success)"
   if (node.outcome === "failed") return "var(--color-error)"
   if (node.lifecycle === "committed") return "var(--color-accent)"
@@ -116,28 +97,12 @@ function writeSavedPositions(map: Map<string, Pt>) {
   } catch {}
 }
 
-function readViewMode(): ViewMode {
-  try {
-    const m = localStorage.getItem(VIEW_MODE_KEY)
-    if (m === "timeline") return "timeline"
-  } catch {}
-  return "graph"
-}
-
-function readGraphStyle(): GraphStyle {
-  try {
-    const m = localStorage.getItem(GRAPH_STYLE_KEY)
-    if (m === "orbit") return "orbit"
-  } catch {}
-  return "cards"
-}
-
 function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n - 1) + "…" : s
 }
 
 /** Longest-path layered layout (TB for cards, LR for timeline). */
-function layered(list: ThesisNode[], dir: "TB" | "LR", gapAlong: number, gapLayer: number): Map<string, Pt> {
+function layered(list: AtlasNode[], dir: "TB" | "LR", gapAlong: number, gapLayer: number): Map<string, Pt> {
   const present = new Set(list.map((n) => n.node_id))
   const byId = new Map(list.map((n) => [n.node_id, n]))
   const layer = new Map<string, number>()
@@ -171,7 +136,7 @@ function layered(list: ThesisNode[], dir: "TB" | "LR", gapAlong: number, gapLaye
   return pos
 }
 
-export function ThesisCanvas(): JSX.Element {
+export function AtlasCanvas(): JSX.Element {
   const dialog = useDialog()
   const sync = useSync()
   const sdk = useSDK()
@@ -183,19 +148,19 @@ export function ThesisCanvas(): JSX.Element {
   // Root list — just the graph roots (fast, root_only=true). Powers the dropdown
   // and default-selection logic without loading every node in the account.
   const [graphList, { refetch: refetchGraphs }] = createResource(() =>
-    thesisAPI
+    atlasAPI
       .listGraphs()
       .then((r) => r.nodes ?? [])
-      .catch(() => [] as ThesisNode[]),
+      .catch(() => [] as AtlasNode[]),
   )
-  const graphs = createMemo<ThesisNode[]>(() =>
+  const graphs = createMemo<AtlasNode[]>(() =>
     [...(graphList.latest ?? [])].sort((a, b) => (a.title || "").localeCompare(b.title || "")),
   )
   // Resolve THIS folder's project root so the canvas defaults to its own graph
   // instead of another project's. `null` = unlinked (offer Initialize); read via
   // `.latest` so it never suspends. `undefined` = still resolving.
   const [folderProject, { refetch: refetchFolderProject }] = createResource(directory, (dir) =>
-    thesisAPI
+    atlasAPI
       .resolveProject(dir)
       .then((r) => r.project_id)
       .catch(() => null),
@@ -242,12 +207,12 @@ export function ThesisCanvas(): JSX.Element {
   const [graphTree, { refetch: refetchTree }] = createResource(
     () => graphId(),
     (id) =>
-      thesisAPI
+      atlasAPI
         .getGraphTree(id)
         .then((r) => r.nodes ?? [])
-        .catch(() => [] as ThesisNode[]),
+        .catch(() => [] as AtlasNode[]),
   )
-  const nodes = createMemo<ThesisNode[]>(() => graphTree.latest ?? [])
+  const nodes = createMemo<AtlasNode[]>(() => graphTree.latest ?? [])
   const byId = createMemo(() => new Map(nodes().map((n) => [n.node_id, n])))
   const loading = createMemo(() => graphList.loading || (graphId() !== undefined && graphTree.loading))
   const refetchAll = () => {
@@ -311,37 +276,13 @@ export function ThesisCanvas(): JSX.Element {
     })
   })
 
-  const [viewMode, setViewModeRaw] = createSignal<ViewMode>(readViewMode())
-  const [graphStyle, setGraphStyleRaw] = createSignal<GraphStyle>(readGraphStyle())
   // Orbit is the one and only graph view — cards and timeline are retired.
   // Pinned here so any previously-saved dashboard.viewMode/graphStyle is ignored.
   const mode = createMemo<Mode>(() => "orbit")
-  const setViewMode = (m: ViewMode) => {
-    try {
-      localStorage.setItem(VIEW_MODE_KEY, m)
-    } catch {}
-    setViewModeRaw(m)
-  }
-  const setGraphStyle = (m: GraphStyle) => {
-    try {
-      localStorage.setItem(GRAPH_STYLE_KEY, m)
-    } catch {}
-    setGraphStyleRaw(m)
-  }
-  // One flat control over the three real layouts (cards / orbit / timeline),
-  // instead of the old nested graph→style + separate timeline toggles.
-  const setMode = (m: Mode) => {
-    if (m === "timeline") {
-      setViewMode("timeline")
-      return
-    }
-    setViewMode("graph")
-    setGraphStyle(m)
-  }
   const [selectedID, setSelectedID] = createSignal<string | null>(null)
   const [creating, setCreating] = createSignal(false)
   const [saved, setSaved] = createSignal(readSavedPositions())
-  const selected = createMemo<ThesisNode | null>(() => {
+  const selected = createMemo<AtlasNode | null>(() => {
     const id = selectedID()
     return id ? (nodes().find((n) => n.node_id === id) ?? null) : null
   })
@@ -576,7 +517,7 @@ export function ThesisCanvas(): JSX.Element {
     if (!title) return
     setCreating(true)
     try {
-      await thesisAPI.createNode(title)
+      await atlasAPI.createNode(title)
       toast.info("node staged", title)
       refresh()
     } catch (err: any) {
@@ -592,7 +533,7 @@ export function ThesisCanvas(): JSX.Element {
     if (initializing()) return
     setInitializing(true)
     try {
-      const { project_id } = await thesisAPI.initProject(directory())
+      const { project_id } = await atlasAPI.initProject(directory())
       if (!project_id) throw new Error("backend returned no project id")
       settled = true
       await refetchAll()
@@ -843,7 +784,7 @@ export function ThesisCanvas(): JSX.Element {
                   fallback={
                     <InitHero
                       // Primary: hit the deterministic find-or-create endpoint
-                      // directly (POST /api/thesis/project/init via thesisAPI) so
+                      // directly (POST /api/atlas/project/init via atlasAPI) so
                       // the button reliably creates the graph without depending on
                       // the agent or the `atlas` binary. initGraph() refetches and
                       // selects the new root, and toasts a typed error on failure.
@@ -1016,7 +957,7 @@ export function ThesisCanvas(): JSX.Element {
           <div style={{ position: "absolute", left: "16px", bottom: "16px", "z-index": 6 }}>
             <Show when={graphMenu()}>
               <div
-                class="thesis-pop-up thesis-scroll"
+                class="atlas-pop-up atlas-scroll"
                 onMouseLeave={() => setGraphMenu(false)}
                 style={{
                   position: "absolute",
@@ -1169,7 +1110,7 @@ export function ThesisCanvas(): JSX.Element {
   )
 }
 
-function CardNode(props: { node: ThesisNode; selected: boolean; hovered: boolean }): JSX.Element {
+function CardNode(props: { node: AtlasNode; selected: boolean; hovered: boolean }): JSX.Element {
   return (
     <>
       <rect
@@ -1228,7 +1169,7 @@ function CardNode(props: { node: ThesisNode; selected: boolean; hovered: boolean
   )
 }
 
-function OrbitTooltip(props: { node: ThesisNode; x: number; y: number; byId: Map<string, ThesisNode> }): JSX.Element {
+function OrbitTooltip(props: { node: AtlasNode; x: number; y: number; byId: Map<string, AtlasNode> }): JSX.Element {
   const segs = () => props.node.child_ids.map((id) => props.byId.get(id)?.outcome ?? null)
   const done = () => segs().filter((s) => s === "completed").length
   return (
@@ -1292,12 +1233,12 @@ function OrbitTooltip(props: { node: ThesisNode; x: number; y: number; byId: Map
   )
 }
 
-function NodeDetail(props: { node: ThesisNode; onClose: () => void }): JSX.Element {
+function NodeDetail(props: { node: AtlasNode; onClose: () => void }): JSX.Element {
   const [artifacts] = createResource(
     () => props.node.node_id,
     async (id) => {
       try {
-        const res = await thesisAPI.listArtifacts(id)
+        const res = await atlasAPI.listArtifacts(id)
         const list = Array.isArray(res) ? res : ((res as any)?.artifacts ?? [])
         return list as Array<{ name?: string; kind?: string; uri?: string }>
       } catch {
@@ -1307,7 +1248,7 @@ function NodeDetail(props: { node: ThesisNode; onClose: () => void }): JSX.Eleme
   )
   return (
     <div
-      class="thesis-fade-in"
+      class="atlas-fade-in"
       style={{
         position: "absolute",
         right: "10px",
@@ -1589,41 +1530,6 @@ function InitHero(props: { onInit: () => void; onChat: () => void; busy: boolean
         or set it up from chat →
       </button>
     </div>
-  )
-}
-
-// A single icon segment in the layout switcher. Active segment lifts onto an
-// elevated chip with a soft shadow; everything animates so switching feels live.
-function ModeSeg(props: { active: boolean; Icon: ModeIcon; label: string; onClick: () => void }): JSX.Element {
-  const [hover, setHover] = createSignal(false)
-  return (
-    <button
-      type="button"
-      title={props.label}
-      aria-label={props.label}
-      aria-pressed={props.active}
-      onClick={props.onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        all: "unset",
-        cursor: "pointer",
-        display: "inline-flex",
-        "align-items": "center",
-        "justify-content": "center",
-        width: "26px",
-        height: "22px",
-        "border-radius": "4px",
-        color: props.active ? "var(--color-text)" : hover() ? "var(--color-text-muted)" : "var(--color-text-faint)",
-        background: props.active ? "var(--color-surface-solid, var(--color-bg-elevated))" : "transparent",
-        "box-shadow": props.active ? "0 1px 2px rgba(0, 0, 0, 0.22)" : "none",
-        transform: props.active ? "translateY(-0.5px)" : "none",
-        transition:
-          "background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard)",
-      }}
-    >
-      <props.Icon size={13} strokeWidth={props.active ? 1.9 : 1.6} />
-    </button>
   )
 }
 

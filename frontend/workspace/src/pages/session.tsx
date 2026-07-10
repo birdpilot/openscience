@@ -8,6 +8,7 @@ import {
   onCleanup,
   onMount,
   Show,
+  Suspense,
   Switch,
   type JSX,
 } from "solid-js"
@@ -20,28 +21,26 @@ import { useLayout } from "@/context/layout"
 import { useTheme } from "@synsci/ui/theme"
 import { PromptInput } from "@/components/prompt-input"
 import { NewSessionView } from "@/components/session/session-new-view"
-import { AsciiSpinner } from "@/thesis/shared/AsciiSpinner"
-import { Wordmark } from "@/thesis/Wordmark"
-import { AppHeader, HeaderIconButton, HeaderDivider } from "@/thesis/AppHeader"
-import { RightPane } from "@/thesis/RightPane"
-import { FileExplorer } from "@/thesis/FileExplorer"
-import { FileView } from "@/thesis/FilePreview"
-import SkillsPage from "@/thesis/SkillsPage"
-import { centerTabs } from "@/thesis/store/centerTabs"
-import { FONT_MONO, FONT_SANS, FONT_SERIF } from "@/styles/tokens"
-import { uiStore } from "@/thesis/store/ui"
-import { useGlobalKeys } from "@/thesis/useGlobalKeys"
+import { AsciiSpinner } from "@/atlas/shared/AsciiSpinner"
+import { Wordmark } from "@/atlas/Wordmark"
+import { AppHeader, HeaderIconButton, HeaderDivider } from "@/atlas/AppHeader"
+import { RightPane } from "@/atlas/RightPane"
+import { FileExplorer } from "@/atlas/FileExplorer"
+import { FileView } from "@/atlas/FilePreview"
+import SkillsPage from "@/atlas/SkillsPage"
+import { centerTabs } from "@/atlas/store/centerTabs"
+import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
+import { uiStore } from "@/atlas/store/ui"
+import { useGlobalKeys } from "@/atlas/useGlobalKeys"
 import { useDialog } from "@synsci/ui/context/dialog"
-import { useModels } from "@/context/models"
 import { useCommand, type CommandOption } from "@/context/command"
 import { useLanguage } from "@/context/language"
-import { openSetupDialog } from "@/thesis/SetupDialog"
-import { confirmDialog } from "@/thesis/dialogs"
+import { confirmDialog } from "@/atlas/dialogs"
 import { DialogSettings } from "@/components/dialog-settings"
-import { DisconnectedPanel } from "@/thesis/DisconnectedPanel"
-import { CommandPalette } from "@/thesis/CommandPalette"
-import { HelpOverlay } from "@/thesis/HelpOverlay"
-import { ToastContainer } from "@/thesis/Toast"
+import { DisconnectedPanel } from "@/atlas/DisconnectedPanel"
+import { CommandPalette } from "@/atlas/CommandPalette"
+import { HelpOverlay } from "@/atlas/HelpOverlay"
+import { ToastContainer } from "@/atlas/Toast"
 import {
   IconChevronDown,
   IconChevronLeft,
@@ -56,11 +55,11 @@ import {
   IconFile,
   IconBrain,
   IconX,
-} from "@/thesis/shared/Icon"
-import { StatusDot } from "@/thesis/shared/StatusDot"
+} from "@/atlas/shared/Icon"
+import { StatusDot } from "@/atlas/shared/StatusDot"
 import { DateTime } from "luxon"
-import { IconTrash } from "@/thesis/shared/Icon"
-import { toast } from "@/thesis/Toast"
+import { IconTrash } from "@/atlas/shared/Icon"
+import { toast } from "@/atlas/Toast"
 
 type SyncSession = ReturnType<typeof useSync>["data"]["session"][number]
 
@@ -445,7 +444,7 @@ export default function Page(): JSX.Element {
 
   return (
     <div
-      class="thesis-root"
+      class="atlas-root"
       style={{
         flex: 1,
         display: "flex",
@@ -542,7 +541,7 @@ export default function Page(): JSX.Element {
                       ref={chatScroll.scrollRef}
                       onScroll={chatScroll.handleScroll}
                       onClick={chatScroll.handleInteraction}
-                      class="thesis-scroll thesis-chat-scroll session-scroller"
+                      class="atlas-scroll atlas-chat-scroll session-scroller"
                       style={{
                         flex: 1,
                         "min-height": 0,
@@ -770,7 +769,12 @@ export default function Page(): JSX.Element {
                   "flex-direction": "column",
                 }}
               >
-                <SkillsPage />
+                {/* Local boundary: SkillsPage reads its skills resource eagerly, so
+                    its first-load suspend must stay in this pane, not blank the
+                    whole session via the coarse route-level <Suspense>. */}
+                <Suspense fallback={<PaneLoading />}>
+                  <SkillsPage />
+                </Suspense>
               </div>
             </Show>
 
@@ -785,12 +789,18 @@ export default function Page(): JSX.Element {
                     "flex-direction": "column",
                   }}
                 >
-                  <FileView
-                    path={doc.path}
-                    directory={doc.directory}
-                    subtitle={`This computer · ${doc.directory.replace(/\/$/, "")}/${doc.path}`}
-                    onClose={() => centerTabs.closeDoc(doc.id)}
-                  />
+                  {/* Local boundary: FileView reads its `file` resource eagerly (the
+                      `kind` memo forces it at mount), so opening a NEW file suspends.
+                      Contain it here so the doc tab shows a local spinner instead of
+                      blanking the entire session through the route-level <Suspense>. */}
+                  <Suspense fallback={<PaneLoading />}>
+                    <FileView
+                      path={doc.path}
+                      directory={doc.directory}
+                      subtitle={`This computer · ${doc.directory.replace(/\/$/, "")}/${doc.path}`}
+                      onClose={() => centerTabs.closeDoc(doc.id)}
+                    />
+                  </Suspense>
                 </div>
               )}
             </For>
@@ -803,11 +813,22 @@ export default function Page(): JSX.Element {
   )
 }
 
+// Pane-scoped Suspense fallback — a small centered spinner shown while an
+// interaction-mounted pane (a file view, the Skills catalog) loads its data,
+// so the load can't reach the route-level boundary and blank the whole session.
+function PaneLoading(): JSX.Element {
+  return (
+    <div style={{ flex: 1, display: "flex", "align-items": "center", "justify-content": "center" }}>
+      <AsciiSpinner size={10} label="loading…" color="var(--color-text-faint)" />
+    </div>
+  )
+}
+
 function CenterTabStrip(props: { chatTitle: string }): JSX.Element {
   const active = centerTabs.active
   return (
     <div
-      class="thesis-scroll"
+      class="atlas-scroll"
       style={{
         display: "flex",
         "align-items": "stretch",
@@ -1094,7 +1115,7 @@ function SessionsSidebar(props: {
   })
   return (
     <aside
-      class="thesis-scroll"
+      class="atlas-scroll"
       style={{
         width: "240px",
         "min-width": "240px",
@@ -1459,155 +1480,3 @@ function SessionRow(props: {
     </div>
   )
 }
-
-function ChatWelcome(): JSX.Element {
-  const models = useModels()
-  const dialog = useDialog()
-  // No connected provider yields any model → the composer's model() stays
-  // undefined. Surface a real setup CTA instead of leading into that dead-end.
-  const noModel = () => models.list().length === 0
-  return (
-    <div
-      class="thesis-fade-in"
-      style={{
-        flex: 1,
-        display: "flex",
-        "flex-direction": "column",
-        "justify-content": "center",
-        gap: "18px",
-        padding: "0 32px",
-        "max-width": "540px",
-        "margin-inline": "auto",
-        width: "100%",
-      }}
-    >
-      <h2
-        style={{
-          margin: 0,
-          "font-family": FONT_SERIF,
-          "font-size": "22px",
-          "line-height": 1.15,
-          "font-weight": 400,
-          "letter-spacing": "-0.02em",
-          color: "var(--color-text)",
-        }}
-      >
-        What are we working on?
-        <span class="thesis-blink" style={{ color: "var(--color-text-faint)" }}>
-          _
-        </span>
-      </h2>
-
-      <Show when={noModel()}>
-        <div style={{ display: "flex", "flex-direction": "column", gap: "8px" }}>
-          <p
-            style={{
-              margin: 0,
-              "font-family": FONT_SANS,
-              "font-size": "13px",
-              color: "var(--color-text-faint)",
-              "line-height": 1.5,
-            }}
-          >
-            No model is connected yet — set one up to start, with managed credits or your own key.
-          </p>
-          <button
-            type="button"
-            onClick={() => openSetupDialog(dialog)}
-            style={{
-              all: "unset",
-              cursor: "pointer",
-              "align-self": "flex-start",
-              display: "inline-flex",
-              "align-items": "center",
-              gap: "6px",
-              height: "34px",
-              padding: "0 16px",
-              "border-radius": "4px",
-              background: "var(--color-accent)",
-              color: "var(--color-on-accent)",
-              "font-family": FONT_MONO,
-              "font-size": "12px",
-            }}
-          >
-            Set up models →
-          </button>
-        </div>
-      </Show>
-
-      <div style={{ display: "flex", "flex-wrap": "wrap", gap: "6px" }}>
-        <For each={WELCOME_MODES}>
-          {(m) => (
-            <button
-              type="button"
-              onClick={() => uiStore.setAgent(m.name)}
-              title={m.hint}
-              style={{
-                all: "unset",
-                cursor: "pointer",
-                padding: "5px 12px",
-                "border-radius": "4px",
-                border: uiStore.agent() === m.name ? "1px solid var(--color-border)" : "1px solid transparent",
-                background: uiStore.agent() === m.name ? "var(--color-accent-subtle)" : "transparent",
-                "font-family": FONT_MONO,
-                "font-size": "11px",
-                color: uiStore.agent() === m.name ? "var(--color-text)" : "var(--color-text-muted)",
-                transition: "border-color 120ms ease, background 120ms ease, color 120ms ease",
-              }}
-              onMouseEnter={(e) => {
-                if (uiStore.agent() !== m.name) e.currentTarget.style.background = "var(--color-bg-elevated)"
-              }}
-              onMouseLeave={(e) => {
-                if (uiStore.agent() !== m.name) e.currentTarget.style.background = "transparent"
-              }}
-            >
-              {m.name}
-            </button>
-          )}
-        </For>
-      </div>
-
-      <div style={{ display: "flex", "flex-direction": "column", gap: "1px" }}>
-        <For each={WELCOME_PROMPTS}>
-          {(p) => (
-            <button
-              type="button"
-              onClick={() => uiStore.setPrefill(p)}
-              style={{
-                all: "unset",
-                cursor: "pointer",
-                display: "flex",
-                "align-items": "baseline",
-                gap: "9px",
-                padding: "7px 2px",
-                "font-family": FONT_SANS,
-                "font-size": "13px",
-                "line-height": 1.5,
-                color: "var(--color-text-faint)",
-                transition: "color 120ms ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-text)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-faint)")}
-            >
-              <span style={{ color: "var(--color-text-faint)", "flex-shrink": 0 }}>→</span>
-              {p}
-            </button>
-          )}
-        </For>
-      </div>
-    </div>
-  )
-}
-
-const WELCOME_MODES: { name: string; hint: string }[] = [
-  { name: "research", hint: "literature + analysis" },
-  { name: "biology", hint: "computational biology" },
-  { name: "physics", hint: "simulation + theory" },
-  { name: "ml", hint: "train + evaluate models" },
-]
-
-const WELCOME_PROMPTS: string[] = [
-  "Survey recent work on this repo's research question and summarize open problems.",
-  "Reproduce the main result and report what's missing to run it end-to-end.",
-  "Draft an experiment plan with hypotheses, metrics, and ablations.",
-]

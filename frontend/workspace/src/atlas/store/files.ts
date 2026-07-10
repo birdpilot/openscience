@@ -10,7 +10,7 @@
  */
 
 import { createSignal, createEffect } from "solid-js"
-import { projectsStore } from "@/thesis/store/projects"
+import { projectsStore } from "@/atlas/store/projects"
 
 export type FileKind = "file" | "dir"
 

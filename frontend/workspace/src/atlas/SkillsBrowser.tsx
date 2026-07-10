@@ -9,7 +9,7 @@ import { Dialog } from "@synsci/ui/dialog"
 import { useDialog } from "@synsci/ui/context/dialog"
 import { useSync } from "@/context/sync"
 import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { IconSearch } from "@/thesis/shared/Icon"
+import { IconSearch } from "@/atlas/shared/Icon"
 
 interface SkillRow {
   name: string
@@ -75,7 +75,7 @@ export function SkillsBrowser(props: { onPick: (name: string) => void; onClose: 
   return (
     <div
       ref={panelRef}
-      class="thesis-fade-in"
+      class="atlas-fade-in"
       style={{
         position: "absolute",
         bottom: "100%",
@@ -150,7 +150,7 @@ export function SkillsBrowser(props: { onPick: (name: string) => void; onClose: 
         </button>
       </div>
 
-      <div class="thesis-scroll" style={{ "overflow-y": "auto", padding: "6px" }}>
+      <div class="atlas-scroll" style={{ "overflow-y": "auto", padding: "6px" }}>
         <Show
           when={total() > 0}
           fallback={
@@ -187,7 +187,7 @@ export function SkillsBrowser(props: { onPick: (name: string) => void; onClose: 
                     <button
                       type="button"
                       onClick={() => props.onPick(skill.name)}
-                      class="thesis-skill-row"
+                      class="atlas-skill-row"
                       style={{
                         all: "unset",
                         cursor: "pointer",
@@ -353,7 +353,7 @@ export function SkillLibraryDialog(props: { onPick: (name: string) => void }): J
         </div>
 
         <div
-          class="thesis-scroll"
+          class="atlas-scroll"
           style={{
             flex: 1,
             "min-height": 0,
@@ -406,7 +406,7 @@ export function SkillLibraryDialog(props: { onPick: (name: string) => void }): J
                       <button
                         type="button"
                         onClick={() => pick(skill.name)}
-                        class="thesis-skill-row"
+                        class="atlas-skill-row"
                         style={{
                           all: "unset",
                           cursor: "pointer",

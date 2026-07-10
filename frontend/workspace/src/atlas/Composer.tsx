@@ -13,17 +13,17 @@ import {
   IconSparkles,
   IconStop,
   IconX,
-} from "@/thesis/shared/Icon"
-import { AsciiSpinner } from "@/thesis/shared/AsciiSpinner"
-import { toast } from "@/thesis/Toast"
-import { SkillsBrowser } from "@/thesis/SkillsBrowser"
-import { uiStore } from "@/thesis/store/ui"
+} from "@/atlas/shared/Icon"
+import { AsciiSpinner } from "@/atlas/shared/AsciiSpinner"
+import { toast } from "@/atlas/Toast"
+import { SkillsBrowser } from "@/atlas/SkillsBrowser"
+import { uiStore } from "@/atlas/store/ui"
 import { URLS } from "@/config/urls"
 import { Identifier } from "@/utils/id"
 import { useProviders, popularProviders } from "@/hooks/use-providers"
 import { useGlobalSync } from "@/context/global-sync"
 import { useDialog } from "@synsci/ui/context/dialog"
-import { openSetupDialog } from "@/thesis/SetupDialog"
+import { openSetupDialog } from "@/atlas/SetupDialog"
 import { resolveModelSource, type ModelSource } from "@/utils/model-cost"
 
 const BYOK_URL = URLS.dashboard
@@ -1045,7 +1045,7 @@ export function Composer(): JSX.Element {
           </Show>
           <Show when={slashOpen()}>
             <div
-              class="thesis-fade-in thesis-scroll"
+              class="atlas-fade-in atlas-scroll"
               style={{
                 position: "absolute",
                 bottom: "100%",
@@ -1218,7 +1218,7 @@ export function Composer(): JSX.Element {
                 <Show when={anchor()}>
                   {(a) => (
                     <div
-                      class={REDUCE_MOTION ? undefined : a().up ? "thesis-pop-up" : "thesis-fade-in"}
+                      class={REDUCE_MOTION ? undefined : a().up ? "atlas-pop-up" : "atlas-fade-in"}
                       role="dialog"
                       aria-label="Select model"
                       style={{
@@ -1289,7 +1289,7 @@ export function Composer(): JSX.Element {
 
                       {/* list */}
                       <div
-                        class="thesis-scroll"
+                        class="atlas-scroll"
                         role="listbox"
                         aria-label="Models"
                         style={{ overflow: "auto", padding: "4px", "min-height": 0, flex: 1 }}
@@ -1630,7 +1630,7 @@ export function Composer(): JSX.Element {
             <Show when={agentOpen()}>
               <div onClick={() => setAgentOpen(false)} style={{ position: "fixed", inset: 0, "z-index": 20 }} />
               <div
-                class="thesis-pop-up thesis-scroll"
+                class="atlas-pop-up atlas-scroll"
                 style={{
                   position: "absolute",
                   bottom: "100%",

@@ -76,7 +76,7 @@ interface BlinkCursorProps {
 export function BlinkCursor(props: BlinkCursorProps): JSX.Element {
   return (
     <span
-      class="thesis-blink"
+      class="atlas-blink"
       style={{
         "font-family": FONT_MONO,
         "font-size": "inherit",

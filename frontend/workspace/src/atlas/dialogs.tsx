@@ -6,7 +6,7 @@ type Dialog = ReturnType<typeof useDialog>
 
 /**
  * Promise-based replacements for window.confirm / window.prompt / window.alert
- * that render inside the app's dialog portal so they match the thesis UI and
+ * that render inside the app's dialog portal so they match the atlas UI and
  * don't reflow or steal focus the way native dialogs do.
  */
 
