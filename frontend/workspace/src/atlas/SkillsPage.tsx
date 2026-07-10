@@ -12,7 +12,7 @@ import { useGlobalSDK } from "@/context/global-sdk"
 import { usePlatform } from "@/context/platform"
 import { useGlobalSync } from "@/context/global-sync"
 import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { IconBrain } from "@/thesis/shared/Icon"
+import { IconBrain } from "@/atlas/shared/Icon"
 import type { Config } from "@synsci/sdk/v2/client"
 import {
   SearchInput,
@@ -253,7 +253,7 @@ export default function SkillsPage(): JSX.Element {
       />
 
       {/* ── Body ───────────────────────────────────────────────────────── */}
-      <div class="thesis-scroll" style={{ flex: 1, "min-height": 0, "overflow-y": "auto", padding: "20px 24px 40px" }}>
+      <div class="atlas-scroll" style={{ flex: 1, "min-height": 0, "overflow-y": "auto", padding: "20px 24px 40px" }}>
         <div style={{ "max-width": "1080px", margin: "0 auto" }}>
           <Show when={view() === "scratch"}>
             <ScratchForm
@@ -321,7 +321,7 @@ export default function SkillsPage(): JSX.Element {
                     {([cat, items]) => (
                       <section style={{ display: "flex", "flex-direction": "column", gap: "11px" }}>
                         <div style={{ display: "flex", "align-items": "baseline", gap: "8px" }}>
-                          <span class="thesis-section-label">{cat}</span>
+                          <span class="atlas-section-label">{cat}</span>
                           <span
                             style={{ "font-family": FONT_MONO, "font-size": "10px", color: "var(--color-text-faint)" }}
                           >
@@ -488,7 +488,7 @@ function ScratchForm(props: {
   const valid = () => /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(name().trim()) && description().trim().length > 0
   return (
     <div class="flex flex-col gap-4 max-w-[680px]">
-      <span class="thesis-section-label">Write a new skill</span>
+      <span class="atlas-section-label">Write a new skill</span>
       <div class="flex flex-col gap-4 p-5 border border-border-weak-base rounded-[8px] bg-surface-base/40">
         <FormField label="Name" value={name()} onInput={setName} placeholder="my-skill (letters, digits, - and _)" />
         <FormField
@@ -522,7 +522,7 @@ function GithubForm(props: { busy: boolean; onCancel: () => void; onInstall: (ur
   const [url, setUrl] = createSignal("")
   return (
     <div class="flex flex-col gap-4 max-w-[680px]">
-      <span class="thesis-section-label">Import from GitHub</span>
+      <span class="atlas-section-label">Import from GitHub</span>
       <div class="flex flex-col gap-4 p-5 border border-border-weak-base rounded-[8px] bg-surface-base/40">
         <FormField label="Repository URL" value={url()} onInput={setUrl} placeholder="https://github.com/owner/repo" />
         <p class="text-12-regular text-text-weak flex items-start gap-1.5">

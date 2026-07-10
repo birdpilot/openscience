@@ -6,7 +6,7 @@ import { readFileSync, realpathSync } from "node:fs"
 import { createHash } from "node:crypto"
 
 /**
- * Dev-only Vite plugin exposing the Atlas graph API at /api/thesis/*.
+ * Dev-only Vite plugin exposing the Atlas graph API at /api/atlas/*.
  *
  * Mirrors the production backend bridge (backend/cli/src/server/routes/
  * atlas-bridge.ts): it proxies straight to the Atlas REST API
@@ -359,7 +359,7 @@ async function handle(req, res) {
 export default {
   name: "atlas-bridge",
   configureServer(server) {
-    server.middlewares.use("/api/thesis", (req, res, next) => {
+    server.middlewares.use("/api/atlas", (req, res, next) => {
       handle(req, res).catch(next)
     })
   },

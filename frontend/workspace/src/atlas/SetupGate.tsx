@@ -9,7 +9,7 @@ import { useServer } from "@/context/server"
 import { useGlobalSync } from "@/context/global-sync"
 import { useGlobalSDK } from "@/context/global-sdk"
 import { useProviders } from "@/hooks/use-providers"
-import { openSetupDialog, readSetupDismissed } from "@/thesis/SetupDialog"
+import { openSetupDialog, readSetupDismissed } from "@/atlas/SetupDialog"
 
 export function SetupGate() {
   const dialog = useDialog()

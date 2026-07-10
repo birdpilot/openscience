@@ -19,15 +19,15 @@ import { useDialog } from "@synsci/ui/context/dialog"
 import { SessionReview } from "@synsci/ui/session-review"
 import { useTerminal } from "@/context/terminal"
 import { Terminal } from "@/components/terminal"
-import { confirmDialog } from "@/thesis/dialogs"
+import { confirmDialog } from "@/atlas/dialogs"
 import { URLS } from "@/config/urls"
-import { uiStore, type RightPaneTab } from "@/thesis/store/ui"
-import { OpenScienceFileTree } from "@/thesis/OpenScienceFileTree"
-import { FilePreview } from "@/thesis/FilePreview"
-import { SkillLibraryDialog } from "@/thesis/SkillsBrowser"
-import { ThesisCanvas } from "@/thesis/ThesisCanvas"
-import { thesisAPI, type ThesisNode } from "@/thesis/api/thesis"
-import { toast } from "@/thesis/Toast"
+import { uiStore, type RightPaneTab } from "@/atlas/store/ui"
+import { OpenScienceFileTree } from "@/atlas/OpenScienceFileTree"
+import { FilePreview } from "@/atlas/FilePreview"
+import { SkillLibraryDialog } from "@/atlas/SkillsBrowser"
+import { AtlasCanvas } from "@/atlas/AtlasCanvas"
+import { atlasAPI, type AtlasNode } from "@/atlas/api/atlas"
+import { toast } from "@/atlas/Toast"
 import {
   IconLayoutGrid,
   IconCpu,
@@ -51,9 +51,9 @@ import {
   IconSettings,
   IconTerminal,
   IconX,
-} from "@/thesis/shared/Icon"
-import { StatusDot, type StatusKind } from "@/thesis/shared/StatusDot"
-import { BlinkCursor } from "@/thesis/shared/AsciiSpinner"
+} from "@/atlas/shared/Icon"
+import { StatusDot, type StatusKind } from "@/atlas/shared/StatusDot"
+import { BlinkCursor } from "@/atlas/shared/AsciiSpinner"
 
 const RIGHT_PANE_WIDTH_KEY = "thesis-right-pane-width-v1"
 const MIN_PANE_WIDTH = 280
@@ -598,8 +598,8 @@ function TabBtn(props: {
 }
 
 // ── Canvas ─────────────────────────────────────────────────────────
-// Real Atlas graph: see ThesisCanvas.tsx. Backed by /api/thesis which
-// the dev Vite plugin (vite-thesis.js) routes to the local @synsci/thesis
+// Real Atlas graph: see AtlasCanvas.tsx. Backed by /api/atlas which
+// the dev Vite plugin (vite-atlas.js) routes to the local @synsci/atlas
 // CLI binary.
 
 function KeepAlive(props: { show: boolean; mounted: boolean; children: JSX.Element }): JSX.Element {
@@ -625,7 +625,7 @@ function KeepAlive(props: { show: boolean; mounted: boolean; children: JSX.Eleme
 }
 
 function CanvasTab(): JSX.Element {
-  return <ThesisCanvas />
+  return <AtlasCanvas />
 }
 
 // ── Files (workspace / repo / artifacts / log) ─────────────────────
@@ -774,7 +774,7 @@ function ChangesView(): JSX.Element {
           </button>
         </Show>
       </div>
-      <div class="thesis-scroll" style={{ flex: 1, "min-height": 0, overflow: "auto" }}>
+      <div class="atlas-scroll" style={{ flex: 1, "min-height": 0, overflow: "auto" }}>
         <Show
           when={diffs().length > 0}
           fallback={
@@ -928,7 +928,7 @@ function RepoView(): JSX.Element {
     () => String(githubRefresh()),
     async () => {
       try {
-        return await thesisAPI.githubStatus()
+        return await atlasAPI.githubStatus()
       } catch (e: any) {
         return { error: e?.message ?? String(e) }
       }
@@ -1011,19 +1011,19 @@ function RepoView(): JSX.Element {
 
   const linkGitHub = () =>
     run("GitHub linked", async () => {
-      await thesisAPI.githubLink({ installationID: install(), state: state() || undefined })
+      await atlasAPI.githubLink({ installationID: install(), state: state() || undefined })
       setInstall("")
       setState("")
     })
 
   const refreshGitHub = () =>
     run("GitHub refreshed", async () => {
-      await thesisAPI.githubRefresh()
+      await atlasAPI.githubRefresh()
     })
 
   const disconnectGitHub = () =>
     run("GitHub disconnected", async () => {
-      await thesisAPI.githubDisconnect()
+      await atlasAPI.githubDisconnect()
     })
 
   const githubSetupUrl = () => String(githubStatus()?.setup_url ?? GITHUB_SETTINGS_URL)
@@ -1034,7 +1034,7 @@ function RepoView(): JSX.Element {
 
   return (
     <div
-      class="thesis-scroll"
+      class="atlas-scroll"
       style={{
         flex: 1,
         "overflow-y": "auto",
@@ -1466,7 +1466,7 @@ function githubRaw(): JSX.CSSProperties {
 }
 
 function ArtifactsView(): JSX.Element {
-  type Row = { node: ThesisNode; artifact: { name?: string; kind?: string; uri?: string; bytes?: number } }
+  type Row = { node: AtlasNode; artifact: { name?: string; kind?: string; uri?: string; bytes?: number } }
   const sync = useSync()
   const sdk = useSDK()
   // Scope to THIS project's graph — never load every node across all projects
@@ -1475,13 +1475,13 @@ function ArtifactsView(): JSX.Element {
   const directory = () => sync.project?.worktree || sync.data.path.directory || sdk.directory
   const [data] = createResource(directory, async (dir) => {
     try {
-      const pid = (await thesisAPI.resolveProject(dir)).project_id
+      const pid = (await atlasAPI.resolveProject(dir)).project_id
       if (!pid) return [] as Row[]
-      const tree = await thesisAPI.getGraphTree(pid)
+      const tree = await atlasAPI.getGraphTree(pid)
       const rows: Row[] = []
       for (const node of tree.nodes ?? []) {
         try {
-          const res = await thesisAPI.listArtifacts(node.node_id)
+          const res = await atlasAPI.listArtifacts(node.node_id)
           const items = Array.isArray(res) ? res : (res.artifacts ?? [])
           for (const a of items) rows.push({ node, artifact: a })
         } catch {}
@@ -1493,7 +1493,7 @@ function ArtifactsView(): JSX.Element {
   })
   return (
     <div
-      class="thesis-scroll"
+      class="atlas-scroll"
       style={{
         flex: 1,
         "overflow-y": "auto",

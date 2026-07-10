@@ -25,7 +25,7 @@ import { retry } from "@synsci/util/retry"
 import { useGlobalSDK } from "./global-sdk"
 // InitError used to live in pages/error.tsx (now deleted with the legacy
 // openscience shell). Inline the shape so the openscience context layer keeps
-// compiling — it's dead code under the new ThesisApp entry but is still
+// compiling — it's dead code under the new AtlasApp entry but is still
 // imported transitively from app.tsx tooling.
 type InitError = { code: string; message?: string; cause?: unknown }
 import {

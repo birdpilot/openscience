@@ -4,7 +4,7 @@ import { useDialog } from "@synsci/ui/context/dialog"
 import { useGlobalSDK } from "@/context/global-sdk"
 import { useGlobalSync } from "@/context/global-sync"
 import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { validateDirectoryPath } from "@/thesis/openDirectory"
+import { validateDirectoryPath } from "@/atlas/openDirectory"
 import {
   IconFolder,
   IconChevronLeft,
@@ -13,7 +13,7 @@ import {
   IconSearch,
   IconRefresh,
   IconHome,
-} from "@/thesis/shared/Icon"
+} from "@/atlas/shared/Icon"
 
 interface FolderEntry {
   name: string
@@ -414,7 +414,7 @@ export function FolderPicker(props: PickerProps): JSX.Element {
 
           {/* Folder list */}
           <div
-            class="thesis-scroll"
+            class="atlas-scroll"
             ref={(el) => {
               // Reset scroll position whenever the user navigates so the new
               // folder always starts at the top instead of carrying the prior
@@ -457,7 +457,7 @@ export function FolderPicker(props: PickerProps): JSX.Element {
                     width: "30%",
                     height: "100%",
                     background: "linear-gradient(90deg, transparent, var(--color-accent), transparent)",
-                    animation: "thesis-loading-slide 1.1s ease-in-out infinite",
+                    animation: "atlas-loading-slide 1.1s ease-in-out infinite",
                   }}
                 />
               </div>
@@ -470,7 +470,7 @@ export function FolderPicker(props: PickerProps): JSX.Element {
                     when={!error()}
                     fallback={
                       <div
-                        class="thesis-fade-in"
+                        class="atlas-fade-in"
                         style={{
                           padding: "32px 24px",
                           "text-align": "center",
@@ -507,7 +507,7 @@ export function FolderPicker(props: PickerProps): JSX.Element {
                     }
                   >
                     <div
-                      class="thesis-fade-in"
+                      class="atlas-fade-in"
                       style={{
                         padding: "32px 24px",
                         "text-align": "center",

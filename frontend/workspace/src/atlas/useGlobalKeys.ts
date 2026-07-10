@@ -1,6 +1,6 @@
 import { onCleanup, onMount } from "solid-js"
 import { useDialog } from "@synsci/ui/context/dialog"
-import { uiStore } from "@/thesis/store/ui"
+import { uiStore } from "@/atlas/store/ui"
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false

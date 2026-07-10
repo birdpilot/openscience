@@ -14,7 +14,7 @@ export function AgentIcon(props: AgentIconProps): JSX.Element {
   const animated = () => props.animated ?? true
   return (
     <span
-      class={`thesis-agent-orbit ${props.class ?? ""}`.trim()}
+      class={`atlas-agent-orbit ${props.class ?? ""}`.trim()}
       style={{
         width: `${size()}px`,
         height: `${size()}px`,
@@ -34,8 +34,8 @@ export function AgentIcon(props: AgentIconProps): JSX.Element {
         stroke-width={strokeWidth()}
         stroke-linecap="round"
       >
-        <ellipse cx="12" cy="12" rx="10" ry="4" class={animated() ? "thesis-orbit-ring-1" : undefined} />
-        <ellipse cx="12" cy="12" rx="4" ry="10" class={animated() ? "thesis-orbit-ring-2" : undefined} />
+        <ellipse cx="12" cy="12" rx="10" ry="4" class={animated() ? "atlas-orbit-ring-1" : undefined} />
+        <ellipse cx="12" cy="12" rx="4" ry="10" class={animated() ? "atlas-orbit-ring-2" : undefined} />
         <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
       </svg>
     </span>

@@ -1,8 +1,8 @@
 import { type JSX, Show, For, onMount, onCleanup } from "solid-js"
 import { Portal } from "solid-js/web"
 import { FONT_MONO, FONT_SANS, FONT_SERIF } from "@/styles/tokens"
-import { IconX } from "@/thesis/shared/Icon"
-import { AgentIcon } from "@/thesis/shared/AgentIcon"
+import { IconX } from "@/atlas/shared/Icon"
+import { AgentIcon } from "@/atlas/shared/AgentIcon"
 
 interface HelpOverlayProps {
   open: boolean
@@ -45,8 +45,8 @@ export function HelpOverlay(props: HelpOverlayProps): JSX.Element {
   return (
     <Show when={props.open}>
       <Portal>
-        <div class="thesis-overlay" onClick={props.onClose} />
-        <div class="thesis-modal" style={{ width: "560px", "max-width": "94vw" }} onClick={(e) => e.stopPropagation()}>
+        <div class="atlas-overlay" onClick={props.onClose} />
+        <div class="atlas-modal" style={{ width: "560px", "max-width": "94vw" }} onClick={(e) => e.stopPropagation()}>
           <div
             style={{
               display: "flex",
@@ -82,7 +82,7 @@ export function HelpOverlay(props: HelpOverlayProps): JSX.Element {
             </button>
           </div>
           <div
-            class="thesis-scroll"
+            class="atlas-scroll"
             style={{
               padding: "20px 24px",
               "max-height": "70vh",

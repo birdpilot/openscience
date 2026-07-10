@@ -2,14 +2,14 @@ import { createSignal, createResource, type JSX, Show, onMount } from "solid-js"
 import { Dialog } from "@synsci/ui/dialog"
 import { useDialog } from "@synsci/ui/context/dialog"
 import { FONT_CODE, FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { IconRefresh, IconArrowRight } from "@/thesis/shared/Icon"
+import { IconRefresh, IconArrowRight } from "@/atlas/shared/Icon"
 
 interface ProbeResult {
   fda: boolean
   reason?: string
 }
 
-const DISMISS_KEY = "thesis.fda.banner.hidden"
+const DISMISS_KEY = "atlas.fda.banner.hidden"
 
 async function probeFda(): Promise<ProbeResult> {
   try {

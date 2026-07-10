@@ -6,8 +6,8 @@ import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
 import { base64Encode } from "@synsci/util/encode"
 import { useGlobalSync } from "@/context/global-sync"
 import { DialogSettings } from "@/components/dialog-settings"
-import { FolderPicker } from "@/thesis/FolderPicker"
-import { IconFolder, IconSearch, IconPlus, IconHome, IconSettings } from "@/thesis/shared/Icon"
+import { FolderPicker } from "@/atlas/FolderPicker"
+import { IconFolder, IconSearch, IconPlus, IconHome, IconSettings } from "@/atlas/shared/Icon"
 
 interface CommandPaletteProps {
   open: boolean
@@ -156,9 +156,9 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
   return (
     <Show when={props.open}>
       <Portal>
-        <div class="thesis-overlay" onClick={props.onClose} />
+        <div class="atlas-overlay" onClick={props.onClose} />
         <div
-          class="thesis-modal thesis-fade-in"
+          class="atlas-modal atlas-fade-in"
           style={{
             top: "12vh",
             left: "50%",
@@ -214,7 +214,7 @@ export function CommandPalette(props: CommandPaletteProps): JSX.Element {
             </span>
           </div>
 
-          <div class="thesis-scroll" style={{ "overflow-y": "auto", "max-height": "52vh", padding: "6px 0" }}>
+          <div class="atlas-scroll" style={{ "overflow-y": "auto", "max-height": "52vh", padding: "6px 0" }}>
             <Show
               when={filtered().length > 0}
               fallback={

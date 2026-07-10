@@ -5,7 +5,7 @@ import { IconButton } from "@synsci/ui/icon-button"
 import { showToast } from "@synsci/ui/toast"
 import { useGlobalSync } from "@/context/global-sync"
 import { useGlobalSDK } from "@/context/global-sdk"
-import { StatusDot } from "@/thesis/shared/StatusDot"
+import { StatusDot } from "@/atlas/shared/StatusDot"
 import type { Config, McpStatus } from "@synsci/sdk/v2/client"
 import {
   PanelScroll,

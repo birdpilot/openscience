@@ -20,28 +20,28 @@ import { useLayout } from "@/context/layout"
 import { useTheme } from "@synsci/ui/theme"
 import { PromptInput } from "@/components/prompt-input"
 import { NewSessionView } from "@/components/session/session-new-view"
-import { AsciiSpinner } from "@/thesis/shared/AsciiSpinner"
-import { Wordmark } from "@/thesis/Wordmark"
-import { AppHeader, HeaderIconButton, HeaderDivider } from "@/thesis/AppHeader"
-import { RightPane } from "@/thesis/RightPane"
-import { FileExplorer } from "@/thesis/FileExplorer"
-import { FileView } from "@/thesis/FilePreview"
-import SkillsPage from "@/thesis/SkillsPage"
-import { centerTabs } from "@/thesis/store/centerTabs"
+import { AsciiSpinner } from "@/atlas/shared/AsciiSpinner"
+import { Wordmark } from "@/atlas/Wordmark"
+import { AppHeader, HeaderIconButton, HeaderDivider } from "@/atlas/AppHeader"
+import { RightPane } from "@/atlas/RightPane"
+import { FileExplorer } from "@/atlas/FileExplorer"
+import { FileView } from "@/atlas/FilePreview"
+import SkillsPage from "@/atlas/SkillsPage"
+import { centerTabs } from "@/atlas/store/centerTabs"
 import { FONT_MONO, FONT_SANS, FONT_SERIF } from "@/styles/tokens"
-import { uiStore } from "@/thesis/store/ui"
-import { useGlobalKeys } from "@/thesis/useGlobalKeys"
+import { uiStore } from "@/atlas/store/ui"
+import { useGlobalKeys } from "@/atlas/useGlobalKeys"
 import { useDialog } from "@synsci/ui/context/dialog"
 import { useModels } from "@/context/models"
 import { useCommand, type CommandOption } from "@/context/command"
 import { useLanguage } from "@/context/language"
-import { openSetupDialog } from "@/thesis/SetupDialog"
-import { confirmDialog } from "@/thesis/dialogs"
+import { openSetupDialog } from "@/atlas/SetupDialog"
+import { confirmDialog } from "@/atlas/dialogs"
 import { DialogSettings } from "@/components/dialog-settings"
-import { DisconnectedPanel } from "@/thesis/DisconnectedPanel"
-import { CommandPalette } from "@/thesis/CommandPalette"
-import { HelpOverlay } from "@/thesis/HelpOverlay"
-import { ToastContainer } from "@/thesis/Toast"
+import { DisconnectedPanel } from "@/atlas/DisconnectedPanel"
+import { CommandPalette } from "@/atlas/CommandPalette"
+import { HelpOverlay } from "@/atlas/HelpOverlay"
+import { ToastContainer } from "@/atlas/Toast"
 import {
   IconChevronDown,
   IconChevronLeft,
@@ -56,11 +56,11 @@ import {
   IconFile,
   IconBrain,
   IconX,
-} from "@/thesis/shared/Icon"
-import { StatusDot } from "@/thesis/shared/StatusDot"
+} from "@/atlas/shared/Icon"
+import { StatusDot } from "@/atlas/shared/StatusDot"
 import { DateTime } from "luxon"
-import { IconTrash } from "@/thesis/shared/Icon"
-import { toast } from "@/thesis/Toast"
+import { IconTrash } from "@/atlas/shared/Icon"
+import { toast } from "@/atlas/Toast"
 
 type SyncSession = ReturnType<typeof useSync>["data"]["session"][number]
 
@@ -445,7 +445,7 @@ export default function Page(): JSX.Element {
 
   return (
     <div
-      class="thesis-root"
+      class="atlas-root"
       style={{
         flex: 1,
         display: "flex",
@@ -542,7 +542,7 @@ export default function Page(): JSX.Element {
                       ref={chatScroll.scrollRef}
                       onScroll={chatScroll.handleScroll}
                       onClick={chatScroll.handleInteraction}
-                      class="thesis-scroll thesis-chat-scroll session-scroller"
+                      class="atlas-scroll atlas-chat-scroll session-scroller"
                       style={{
                         flex: 1,
                         "min-height": 0,
@@ -807,7 +807,7 @@ function CenterTabStrip(props: { chatTitle: string }): JSX.Element {
   const active = centerTabs.active
   return (
     <div
-      class="thesis-scroll"
+      class="atlas-scroll"
       style={{
         display: "flex",
         "align-items": "stretch",
@@ -1094,7 +1094,7 @@ function SessionsSidebar(props: {
   })
   return (
     <aside
-      class="thesis-scroll"
+      class="atlas-scroll"
       style={{
         width: "240px",
         "min-width": "240px",
@@ -1468,7 +1468,7 @@ function ChatWelcome(): JSX.Element {
   const noModel = () => models.list().length === 0
   return (
     <div
-      class="thesis-fade-in"
+      class="atlas-fade-in"
       style={{
         flex: 1,
         display: "flex",
@@ -1493,7 +1493,7 @@ function ChatWelcome(): JSX.Element {
         }}
       >
         What are we working on?
-        <span class="thesis-blink" style={{ color: "var(--color-text-faint)" }}>
+        <span class="atlas-blink" style={{ color: "var(--color-text-faint)" }}>
           _
         </span>
       </h2>

@@ -342,7 +342,7 @@ export namespace SessionProcessor {
                   if (usageResult && "modelBlocked" in usageResult) {
                     log.warn("model blocked by server — halting session", { model: input.model.id })
                     // Hard stop. The user is out of credits (managed
-                    // mode) or has no active thesis subscription. The
+                    // mode) or has no active atlas subscription. The
                     // current step's response is already in their
                     // context; we just don't kick off the next loop.
                     throw new InsufficientCreditsError()

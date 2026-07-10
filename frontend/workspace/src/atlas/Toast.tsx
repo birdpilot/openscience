@@ -1,8 +1,8 @@
 import { createSignal, type JSX, For, Show } from "solid-js"
 import { Portal } from "solid-js/web"
 import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { StatusDot, type StatusKind } from "@/thesis/shared/StatusDot"
-import { IconX } from "@/thesis/shared/Icon"
+import { StatusDot, type StatusKind } from "@/atlas/shared/StatusDot"
+import { IconX } from "@/atlas/shared/Icon"
 
 export type ToastKind = "info" | "success" | "warning" | "error"
 
@@ -72,7 +72,7 @@ export function ToastContainer(): JSX.Element {
         <For each={toasts()}>
           {(t) => (
             <div
-              class="thesis-slide-up"
+              class="atlas-slide-up"
               style={{
                 background: "var(--color-surface-solid)",
                 border: "1px solid var(--color-border)",

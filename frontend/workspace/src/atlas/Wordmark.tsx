@@ -15,7 +15,7 @@ export function Wordmark(props: WordmarkProps): JSX.Element {
   return (
     <button
       onClick={props.onClick}
-      class="thesis-wordmark"
+      class="atlas-wordmark"
       style={{
         all: "unset",
         cursor: props.onClick ? "pointer" : "default",

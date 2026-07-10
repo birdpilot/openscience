@@ -30,7 +30,7 @@ export function StatusDot(props: StatusDotProps): JSX.Element {
   return (
     <span
       aria-hidden="true"
-      class={props.pulse ? "thesis-pulse" : undefined}
+      class={props.pulse ? "atlas-pulse" : undefined}
       style={{
         "font-family": FONT_MONO,
         "font-size": `${size()}px`,

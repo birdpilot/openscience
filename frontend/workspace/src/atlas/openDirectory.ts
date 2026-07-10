@@ -7,9 +7,9 @@
  * a FileList we walk into the same FileNode tree.
  */
 
-import { projectsStore, type Project } from "@/thesis/store/projects"
-import { filesStore } from "@/thesis/store/files"
-import { toast } from "@/thesis/Toast"
+import { projectsStore, type Project } from "@/atlas/store/projects"
+import { filesStore } from "@/atlas/store/files"
+import { toast } from "@/atlas/Toast"
 
 interface DirectoryEntry {
   name: string
@@ -41,7 +41,7 @@ export const isNativePickerSupported = () =>
 async function pickViaFsApi(): Promise<DirectoryEntry | null> {
   try {
     const handle: any = await window.showDirectoryPicker!({
-      id: "thesis-project-root",
+      id: "atlas-project-root",
       mode: "readwrite",
     })
     // Read up to 16 immediate child entry names. The browser doesn't
@@ -192,7 +192,7 @@ export async function chooseAndOpenProject(): Promise<Project | null> {
   const existing = projectsStore.list().find((p) => p.path === entry.path)
   const project = existing ?? projectsStore.create({ name: entry.name, path: entry.path })
 
-  // Open it FIRST — this flips the activeId so ThesisApp jumps to the
+  // Open it FIRST — this flips the activeId so AtlasApp jumps to the
   // Project view immediately. File scanning happens in the background.
   projectsStore.open(project.id)
   toast.success(existing ? "project reopened" : "project opened", entry.name)

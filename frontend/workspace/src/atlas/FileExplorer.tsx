@@ -2,8 +2,8 @@ import { createSignal, createResource, createMemo, onCleanup, type JSX, For, Sho
 import { useSDK } from "@/context/sdk"
 import { useSync } from "@/context/sync"
 import { FONT_MONO, FONT_SANS } from "@/styles/tokens"
-import { centerTabs } from "@/thesis/store/centerTabs"
-import { thesisAPI, type ThesisNode } from "@/thesis/api/thesis"
+import { centerTabs } from "@/atlas/store/centerTabs"
+import { atlasAPI, type AtlasNode } from "@/atlas/api/atlas"
 import {
   IconFolder,
   IconFile,
@@ -16,7 +16,7 @@ import {
   IconHome,
   IconCpu,
   IconArchive,
-} from "@/thesis/shared/Icon"
+} from "@/atlas/shared/Icon"
 
 interface FileNode {
   name: string
@@ -405,7 +405,7 @@ export function FileExplorer(): JSX.Element {
         </div>
 
         {/* body */}
-        <div class="thesis-scroll" style={{ flex: 1, "min-height": 0, "overflow-y": "auto", "overflow-x": "hidden" }}>
+        <div class="atlas-scroll" style={{ flex: 1, "min-height": 0, "overflow-y": "auto", "overflow-x": "hidden" }}>
           <Show when={!entries.loading || entries.latest} fallback={<div style={emptyMsg()}>loading…</div>}>
             <Show
               when={!permissionError()}
@@ -570,7 +570,7 @@ function GridBody(props: { nodes: FileNode[]; onClick: (n: FileNode) => void }):
 }
 
 // ── Artifacts (project Atlas graph) ────────────────────────────────
-type ArtifactRow = { node: ThesisNode; artifact: { name?: string; kind?: string; uri?: string } }
+type ArtifactRow = { node: AtlasNode; artifact: { name?: string; kind?: string; uri?: string } }
 
 function ArtifactsPanel(): JSX.Element {
   const sync = useSync()
@@ -578,13 +578,13 @@ function ArtifactsPanel(): JSX.Element {
   const directory = () => sync.project?.worktree || sync.data.path.directory || sdk.directory
   const [data] = createResource(directory, async (dir) => {
     try {
-      const pid = (await thesisAPI.resolveProject(dir)).project_id
+      const pid = (await atlasAPI.resolveProject(dir)).project_id
       if (!pid) return [] as ArtifactRow[]
-      const tree = await thesisAPI.getGraphTree(pid)
+      const tree = await atlasAPI.getGraphTree(pid)
       const rows: ArtifactRow[] = []
       for (const node of tree.nodes ?? []) {
         try {
-          const res = await thesisAPI.listArtifacts(node.node_id)
+          const res = await atlasAPI.listArtifacts(node.node_id)
           const items = Array.isArray(res) ? res : (res.artifacts ?? [])
           for (const a of items) rows.push({ node, artifact: a })
         } catch {}
@@ -595,7 +595,7 @@ function ArtifactsPanel(): JSX.Element {
     }
   })
   return (
-    <div class="thesis-scroll" style={{ flex: 1, "min-height": 0, "overflow-y": "auto", padding: "8px 4px" }}>
+    <div class="atlas-scroll" style={{ flex: 1, "min-height": 0, "overflow-y": "auto", padding: "8px 4px" }}>
       <Show
         when={(data.latest ?? []).length > 0}
         fallback={
