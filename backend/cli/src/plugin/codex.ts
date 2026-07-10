@@ -1,7 +1,7 @@
 import type { Hooks, PluginInput } from "@synsci/plugin"
 import { Log } from "../util/log"
 import { Installation } from "../installation"
-import { Auth, OAUTH_DUMMY_KEY } from "../auth"
+import { OAUTH_DUMMY_KEY } from "../auth"
 import { OpenScience } from "../openscience"
 import { managedApiBase } from "../endpoints"
 import os from "os"

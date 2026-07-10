@@ -629,37 +629,6 @@ function createGlobalSync() {
     return promise
   }
 
-  function purgeMessageParts(setStore: SetStoreFunction<State>, messageID: string | undefined) {
-    if (!messageID) return
-    setStore(
-      produce((draft) => {
-        delete draft.part[messageID]
-      }),
-    )
-  }
-
-  function purgeSessionData(store: Store<State>, setStore: SetStoreFunction<State>, sessionID: string | undefined) {
-    if (!sessionID) return
-
-    const messages = store.message[sessionID]
-    const messageIDs = (messages ?? []).map((m) => m.id).filter((id): id is string => !!id)
-
-    setStore(
-      produce((draft) => {
-        delete draft.message[sessionID]
-        delete draft.session_diff[sessionID]
-        delete draft.todo[sessionID]
-        delete draft.permission[sessionID]
-        delete draft.question[sessionID]
-        delete draft.session_status[sessionID]
-
-        for (const messageID of messageIDs) {
-          delete draft.part[messageID]
-        }
-      }),
-    )
-  }
-
   const unsub = globalSDK.event.listen((e) => {
     const directory = e.name
     const event = e.details

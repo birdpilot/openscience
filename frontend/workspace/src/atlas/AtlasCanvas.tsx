@@ -28,23 +28,13 @@ import { useSync } from "@/context/sync"
 import { useSDK } from "@/context/sdk"
 import { uiStore } from "@/atlas/store/ui"
 import { FONT_MONO, FONT_SANS, FONT_SERIF, sectionTitle } from "@/styles/tokens"
-import {
-  IconRefresh,
-  IconPlus,
-  IconNetwork,
-  IconArrowRight,
-  IconLayoutGrid,
-  IconAtom,
-  IconActivity,
-} from "@/atlas/shared/Icon"
+import { IconRefresh, IconPlus, IconNetwork, IconArrowRight } from "@/atlas/shared/Icon"
 import { atlasAPI, type AtlasNode } from "@/atlas/api/atlas"
 import { toast } from "@/atlas/Toast"
 import { promptDialog } from "@/atlas/dialogs"
 import { AsciiSpinner } from "@/atlas/shared/AsciiSpinner"
 
 const POSITIONS_KEY = "thesis-canvas-positions-v1"
-const VIEW_MODE_KEY = "dashboard.viewMode"
-const GRAPH_STYLE_KEY = "dashboard.graphStyle"
 const ROOT_R = 12
 const BASE_R = 9
 const MAX_R = 14
@@ -53,15 +43,6 @@ const CARD_W = 210
 const CARD_H = 92
 
 type Mode = "orbit" | "cards" | "timeline"
-type ViewMode = "graph" | "timeline"
-type GraphStyle = "cards" | "orbit"
-
-type ModeIcon = (p: { size?: number; strokeWidth?: number }) => JSX.Element
-const MODES: { k: Mode; label: string; Icon: ModeIcon }[] = [
-  { k: "cards", label: "cards", Icon: IconLayoutGrid },
-  { k: "orbit", label: "orbit", Icon: IconAtom },
-  { k: "timeline", label: "timeline", Icon: IconActivity },
-]
 
 interface Pt {
   x: number
@@ -114,22 +95,6 @@ function writeSavedPositions(map: Map<string, Pt>) {
   try {
     localStorage.setItem(POSITIONS_KEY, JSON.stringify(Object.fromEntries(map)))
   } catch {}
-}
-
-function readViewMode(): ViewMode {
-  try {
-    const m = localStorage.getItem(VIEW_MODE_KEY)
-    if (m === "timeline") return "timeline"
-  } catch {}
-  return "graph"
-}
-
-function readGraphStyle(): GraphStyle {
-  try {
-    const m = localStorage.getItem(GRAPH_STYLE_KEY)
-    if (m === "orbit") return "orbit"
-  } catch {}
-  return "cards"
 }
 
 function truncate(s: string, n: number): string {
@@ -311,33 +276,9 @@ export function AtlasCanvas(): JSX.Element {
     })
   })
 
-  const [viewMode, setViewModeRaw] = createSignal<ViewMode>(readViewMode())
-  const [graphStyle, setGraphStyleRaw] = createSignal<GraphStyle>(readGraphStyle())
   // Orbit is the one and only graph view — cards and timeline are retired.
   // Pinned here so any previously-saved dashboard.viewMode/graphStyle is ignored.
   const mode = createMemo<Mode>(() => "orbit")
-  const setViewMode = (m: ViewMode) => {
-    try {
-      localStorage.setItem(VIEW_MODE_KEY, m)
-    } catch {}
-    setViewModeRaw(m)
-  }
-  const setGraphStyle = (m: GraphStyle) => {
-    try {
-      localStorage.setItem(GRAPH_STYLE_KEY, m)
-    } catch {}
-    setGraphStyleRaw(m)
-  }
-  // One flat control over the three real layouts (cards / orbit / timeline),
-  // instead of the old nested graph→style + separate timeline toggles.
-  const setMode = (m: Mode) => {
-    if (m === "timeline") {
-      setViewMode("timeline")
-      return
-    }
-    setViewMode("graph")
-    setGraphStyle(m)
-  }
   const [selectedID, setSelectedID] = createSignal<string | null>(null)
   const [creating, setCreating] = createSignal(false)
   const [saved, setSaved] = createSignal(readSavedPositions())
@@ -1589,41 +1530,6 @@ function InitHero(props: { onInit: () => void; onChat: () => void; busy: boolean
         or set it up from chat →
       </button>
     </div>
-  )
-}
-
-// A single icon segment in the layout switcher. Active segment lifts onto an
-// elevated chip with a soft shadow; everything animates so switching feels live.
-function ModeSeg(props: { active: boolean; Icon: ModeIcon; label: string; onClick: () => void }): JSX.Element {
-  const [hover, setHover] = createSignal(false)
-  return (
-    <button
-      type="button"
-      title={props.label}
-      aria-label={props.label}
-      aria-pressed={props.active}
-      onClick={props.onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        all: "unset",
-        cursor: "pointer",
-        display: "inline-flex",
-        "align-items": "center",
-        "justify-content": "center",
-        width: "26px",
-        height: "22px",
-        "border-radius": "4px",
-        color: props.active ? "var(--color-text)" : hover() ? "var(--color-text-muted)" : "var(--color-text-faint)",
-        background: props.active ? "var(--color-surface-solid, var(--color-bg-elevated))" : "transparent",
-        "box-shadow": props.active ? "0 1px 2px rgba(0, 0, 0, 0.22)" : "none",
-        transform: props.active ? "translateY(-0.5px)" : "none",
-        transition:
-          "background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard)",
-      }}
-    >
-      <props.Icon size={13} strokeWidth={props.active ? 1.9 : 1.6} />
-    </button>
   )
 }
 
