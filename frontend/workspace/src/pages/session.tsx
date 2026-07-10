@@ -8,6 +8,7 @@ import {
   onCleanup,
   onMount,
   Show,
+  Suspense,
   Switch,
   type JSX,
 } from "solid-js"
@@ -768,7 +769,12 @@ export default function Page(): JSX.Element {
                   "flex-direction": "column",
                 }}
               >
-                <SkillsPage />
+                {/* Local boundary: SkillsPage reads its skills resource eagerly, so
+                    its first-load suspend must stay in this pane, not blank the
+                    whole session via the coarse route-level <Suspense>. */}
+                <Suspense fallback={<PaneLoading />}>
+                  <SkillsPage />
+                </Suspense>
               </div>
             </Show>
 
@@ -783,12 +789,18 @@ export default function Page(): JSX.Element {
                     "flex-direction": "column",
                   }}
                 >
-                  <FileView
-                    path={doc.path}
-                    directory={doc.directory}
-                    subtitle={`This computer · ${doc.directory.replace(/\/$/, "")}/${doc.path}`}
-                    onClose={() => centerTabs.closeDoc(doc.id)}
-                  />
+                  {/* Local boundary: FileView reads its `file` resource eagerly (the
+                      `kind` memo forces it at mount), so opening a NEW file suspends.
+                      Contain it here so the doc tab shows a local spinner instead of
+                      blanking the entire session through the route-level <Suspense>. */}
+                  <Suspense fallback={<PaneLoading />}>
+                    <FileView
+                      path={doc.path}
+                      directory={doc.directory}
+                      subtitle={`This computer · ${doc.directory.replace(/\/$/, "")}/${doc.path}`}
+                      onClose={() => centerTabs.closeDoc(doc.id)}
+                    />
+                  </Suspense>
                 </div>
               )}
             </For>
@@ -797,6 +809,17 @@ export default function Page(): JSX.Element {
 
         <RightPane />
       </div>
+    </div>
+  )
+}
+
+// Pane-scoped Suspense fallback — a small centered spinner shown while an
+// interaction-mounted pane (a file view, the Skills catalog) loads its data,
+// so the load can't reach the route-level boundary and blank the whole session.
+function PaneLoading(): JSX.Element {
+  return (
+    <div style={{ flex: 1, display: "flex", "align-items": "center", "justify-content": "center" }}>
+      <AsciiSpinner size={10} label="loading…" color="var(--color-text-faint)" />
     </div>
   )
 }
